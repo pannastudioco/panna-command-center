@@ -487,6 +487,94 @@ export async function generateDescription(
   return geminiGenerate<DescriptionResult>(keys, prompt, schema);
 }
 
+export interface NarrativeResult {
+  narrative: string;
+  wordCount: number;
+  /** ~150 wpm natural narration pace — a heuristic estimate, not a measured fact. */
+  estimatedDurationSeconds: number;
+  structureNotes: string;
+}
+
+/**
+ * Original voice-over script generated FROM a research briefing (see contentResearchService.ts)
+ * — never a copy of it. The briefing supplies the facts (already source-checked, with any
+ * unverified claim tagged); this call is explicitly told to rewrite everything in fresh language
+ * and to preserve the briefing's own uncertainty tags rather than flatten them into stated fact.
+ */
+export async function generateNarrative(
+  keys: string[],
+  topic: string,
+  researchBriefing: string,
+  opts: { market?: string | null; angle?: string | null } = {}
+): Promise<NarrativeResult> {
+  const { market = null, angle = null } = opts;
+  const prompt =
+    `You are a professional scriptwriter for YouTube voice-over narration. Topic: "${topic}".\n\n` +
+    `Use the RESEARCH BRIEFING below only as factual grounding — do NOT copy any sentence from it ` +
+    `verbatim. Rewrite everything in fresh, original language.\n\n` +
+    `RESEARCH BRIEFING:\n${researchBriefing}\n\n` +
+    (angle ? `Write from this specific angle: "${angle}".\n\n` : '') +
+    `${localeClause(market)}\n\n` +
+    `Write for the EAR, not the eye — this is read aloud, not read on screen: short sentences, natural ` +
+    `spoken rhythm, no bullet points, no markdown, no headers. Structure:\n` +
+    `1) HOOK (first 2-3 sentences): earn attention immediately with a stake, a question, or a striking ` +
+    `fact from the briefing. No throat-clearing, no "in this video we will...".\n` +
+    `2) BODY: deliver the substance in a clear, logical order.\n` +
+    `3) CLOSE: a natural wrap-up (not a hard sales pitch) that leaves the viewer with something to think ` +
+    `about or act on.\n\n` +
+    `Where the briefing tags a claim "(klaim, belum terverifikasi)" or similar, either soften the language ` +
+    `to match that uncertainty or leave it out entirely — never state it as settled fact. Do not invent ` +
+    `any fact, number, or quote beyond what the briefing supports.\n\n` +
+    `STRICTLY anti-generic: no filler, no template phrasing ("in today's video", "without further ado"), ` +
+    `no clichés.\n\n` +
+    `Return the finished narrative text, and a one-line note on the structural choices you made.`;
+
+  const schema: GeminiSchema = {
+    type: 'object',
+    properties: {
+      narrative: { type: 'string' },
+      structureNotes: { type: 'string' },
+    },
+    required: ['narrative', 'structureNotes'],
+  };
+
+  const result = await geminiGenerate<{ narrative: string; structureNotes: string }>(keys, prompt, schema);
+  const wordCount = result.narrative.trim().split(/\s+/).filter(Boolean).length;
+  return {
+    narrative: result.narrative,
+    structureNotes: result.structureNotes,
+    wordCount,
+    estimatedDurationSeconds: Math.round((wordCount / 150) * 60),
+  };
+}
+
+/**
+ * Suggested video tags — the small, honest role tags actually play: YouTube's own tags doc says
+ * they're "not that important" for discovery, mainly a misspelling safety net, so this asks for
+ * a short list (5-8, matching the app's existing "5-8 and stop" guidance elsewhere) rather than
+ * padding out a long list that implies more weight than tags actually carry.
+ */
+export async function generateTags(
+  keys: string[],
+  topic: string,
+  opts: { market?: string | null } = {}
+): Promise<string[]> {
+  const { market = null } = opts;
+  const prompt =
+    `Suggest 5-8 relevant YouTube tags for this video topic: "${topic}".\n\n` +
+    `${localeClause(market)}\n\n` +
+    `YouTube's own tags guidance says tags play a minor role in discovery (mainly a misspelling ` +
+    `safety net) — so keep this list SHORT and genuinely relevant, do not pad it. Mix broad and ` +
+    `specific terms. No hashtags (no #), no duplicates, no generic filler tags.`;
+  const schema: GeminiSchema = {
+    type: 'object',
+    properties: { tags: { type: 'array', items: { type: 'string' } } },
+    required: ['tags'],
+  };
+  const result = await geminiGenerate<{ tags: string[] }>(keys, prompt, schema);
+  return result.tags ?? [];
+}
+
 export interface KeywordCluster {
   theme: string;
   keywords: string[];

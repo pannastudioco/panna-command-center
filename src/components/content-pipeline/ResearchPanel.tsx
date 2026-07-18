@@ -10,10 +10,14 @@ import { StrategyPanel, Example, Why } from '@/components/shared/ui/StrategyPane
 
 interface Props {
   geminiKeys: string[];
+  /** Last topic researched in this pipeline session, if any — preserved across tab switches. */
+  initialTopic?: string;
+  /** Reports a successful research back up to ContentPipeline so later stages (Narasi, ...) can use it. */
+  onResearched?: (topic: string, result: ResearchResult) => void;
 }
 
-export const ResearchPanel: React.FC<Props> = ({ geminiKeys }) => {
-  const [topic, setTopic] = useState('');
+export const ResearchPanel: React.FC<Props> = ({ geminiKeys, initialTopic = '', onResearched }) => {
+  const [topic, setTopic] = useState(initialTopic);
   const [result, setResult] = useState<ResearchResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -26,12 +30,13 @@ export const ResearchPanel: React.FC<Props> = ({ geminiKeys }) => {
     try {
       const r = await researchTopic(geminiKeys, topic.trim());
       setResult(r);
+      onResearched?.(topic.trim(), r);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Gagal melakukan riset.');
     } finally {
       setIsLoading(false);
     }
-  }, [topic, geminiKeys]);
+  }, [topic, geminiKeys, onResearched]);
 
   return (
     <div className="max-w-4xl space-y-5 animate-fade-in">

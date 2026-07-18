@@ -1,22 +1,42 @@
 import React, { useState } from 'react';
-import { Newspaper, FileSearch } from 'lucide-react';
+import { Newspaper, FileSearch, ScrollText, Tag, Image, Mic, FolderArchive } from 'lucide-react';
 import { useGeminiKeys } from '@/hooks/useGeminiKeys';
+import type { ResearchResult } from '@/services/contentResearchService';
+import type { NarrativeResult } from '@/services/geminiService';
 import { ResearchPanel } from './ResearchPanel';
+import { NarrativePanel } from './NarrativePanel';
+import { MetadataPanel, type MetadataResult } from './MetadataPanel';
+import { ThumbnailPanel, type ThumbnailStageResult } from './ThumbnailPanel';
+import { VoiceoverPanel, type VoiceoverResult } from './VoiceoverPanel';
+import { ExportPanel } from './ExportPanel';
 
 /**
  * Produksi Konten — pipeline pra-produksi konten (riset → narasi → metadata → thumbnail →
- * voice-over → ekspor), dibangun bertahap satu tab per tahap. Hanya tab 'research' yang aktif
- * sejauh ini (2026-07-18); tab lain menyusul.
+ * voice-over → ekspor), dibangun bertahap satu tab per tahap. State hasil tiap tahap disimpan di
+ * sini (bukan di tiap panel) supaya tahap berikutnya bisa memakai hasil tahap sebelumnya tanpa
+ * hilang saat pindah tab — pola yang sama dengan useOwnVideoCatalog/usePlaylistManager di App.tsx.
  */
-type Stage = 'research';
+type Stage = 'research' | 'narrative' | 'metadata' | 'thumbnail' | 'voiceover' | 'export';
 
 const STAGES: { id: Stage; label: string; icon: React.ElementType; available: boolean }[] = [
   { id: 'research', label: 'Riset & Verifikasi', icon: FileSearch, available: true },
+  { id: 'narrative', label: 'Narasi', icon: ScrollText, available: true },
+  { id: 'metadata', label: 'Metadata SEO', icon: Tag, available: true },
+  { id: 'thumbnail', label: 'Konsep Thumbnail', icon: Image, available: true },
+  { id: 'voiceover', label: 'Voice Over', icon: Mic, available: true },
+  { id: 'export', label: 'Ekspor', icon: FolderArchive, available: true },
 ];
 
 export const ContentPipeline: React.FC = () => {
   const { geminiKeys } = useGeminiKeys();
   const [stage, setStage] = useState<Stage>('research');
+
+  const [topic, setTopic] = useState('');
+  const [research, setResearch] = useState<ResearchResult | null>(null);
+  const [narrative, setNarrative] = useState<NarrativeResult | null>(null);
+  const [metadata, setMetadata] = useState<MetadataResult | null>(null);
+  const [thumbnail, setThumbnail] = useState<ThumbnailStageResult | null>(null);
+  const [voiceover, setVoiceover] = useState<VoiceoverResult | null>(null);
 
   return (
     <div className="max-w-6xl space-y-6">
@@ -54,7 +74,56 @@ export const ContentPipeline: React.FC = () => {
         ))}
       </div>
 
-      {stage === 'research' && <ResearchPanel geminiKeys={geminiKeys} />}
+      {stage === 'research' && (
+        <ResearchPanel
+          geminiKeys={geminiKeys}
+          initialTopic={topic}
+          onResearched={(t, r) => {
+            setTopic(t);
+            setResearch(r);
+          }}
+        />
+      )}
+      {stage === 'narrative' && (
+        <NarrativePanel
+          geminiKeys={geminiKeys}
+          topic={topic}
+          research={research}
+          narrative={narrative}
+          onNarrativeGenerated={setNarrative}
+        />
+      )}
+      {stage === 'metadata' && (
+        <MetadataPanel
+          geminiKeys={geminiKeys}
+          topic={topic}
+          narrative={narrative}
+          metadata={metadata}
+          onMetadataGenerated={setMetadata}
+        />
+      )}
+      {stage === 'thumbnail' && (
+        <ThumbnailPanel
+          geminiKeys={geminiKeys}
+          topic={topic}
+          metadata={metadata}
+          thumbnail={thumbnail}
+          onThumbnailGenerated={setThumbnail}
+        />
+      )}
+      {stage === 'voiceover' && (
+        <VoiceoverPanel geminiKeys={geminiKeys} narrative={narrative} onVoiceoverGenerated={setVoiceover} />
+      )}
+      {stage === 'export' && (
+        <ExportPanel
+          topic={topic}
+          research={research}
+          narrative={narrative}
+          metadata={metadata}
+          thumbnail={thumbnail}
+          voiceover={voiceover}
+        />
+      )}
     </div>
   );
 };
