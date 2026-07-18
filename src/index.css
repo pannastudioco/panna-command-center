@@ -1,0 +1,301 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: var(--app-bg);
+  --color-surface: var(--app-surface);
+  --color-surface-raised: var(--app-surface-raised);
+  --color-surface-hover: var(--app-surface-hover);
+  --color-border: var(--app-border);
+  --color-border-strong: var(--app-border-strong);
+
+  --color-primary: var(--app-primary);
+  --color-primary-hover: var(--app-primary-hover);
+  --color-primary-active: var(--app-primary-active);
+  --color-accent: var(--app-accent);
+  --color-accent-hover: var(--app-accent-hover);
+
+  --color-text: var(--app-text);
+  --color-text-muted: var(--app-text-muted);
+  --color-text-faint: var(--app-text-faint);
+  --color-on-primary: var(--app-on-primary);
+
+  --color-success: var(--app-success);
+  --color-success-bg: var(--app-success-bg);
+  --color-warning: var(--app-warning);
+  --color-warning-bg: var(--app-warning-bg);
+  --color-danger: var(--app-danger);
+  --color-danger-bg: var(--app-danger-bg);
+  --color-info: var(--app-info);
+  --color-info-bg: var(--app-info-bg);
+
+  --color-ring: var(--app-ring);
+
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', monospace;
+
+  --radius-sm: 0.375rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 0.875rem;
+  --radius-xl: 1.25rem;
+  /* "Nested radius law": for an element sitting inside a padded card, using this
+     instead of an independent rounded-* keeps concentric corners centered on the
+     same origin as the parent — reads as crafted rather than two unrelated
+     roundings stacked on top of each other. */
+  --radius-inner: 0.5rem;
+
+  --shadow-xs: var(--app-shadow-xs);
+  --shadow-sm: var(--app-shadow-sm);
+  --shadow-md: var(--app-shadow-md);
+  --shadow-lg: var(--app-shadow-lg);
+  --shadow-glow: var(--app-shadow-glow);
+  --shadow-glow-accent: var(--app-shadow-glow-accent);
+
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  --animate-fade-in: fadeIn 0.35s var(--ease-standard) forwards;
+  --animate-slide-up: slideUp 0.4s var(--ease-standard) forwards;
+  --animate-scale-in: scaleIn 0.2s var(--ease-standard) forwards;
+  --animate-shimmer: shimmer 1.8s ease-in-out infinite;
+  --animate-pop: pop 0.32s var(--ease-spring) forwards;
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+@keyframes slideUp {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes scaleIn {
+  0% { opacity: 0; transform: scale(0.96); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+@keyframes pop {
+  0% { opacity: 0; transform: scale(0.85); }
+  60% { opacity: 1; transform: scale(1.04); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* ---- Light theme ----
+   Neutrals carry a whisper of warmth (H≈75, tiny chroma) instead of clinical
+   blue-grey — the brand's coolness lives entirely in primary/accent, not the
+   canvas. Built in OKLCH for perceptually-even lightness steps between
+   surface/raised/hover, so elevation reads as consistent steps rather than
+   arbitrary jumps. */
+:root {
+  --app-bg: oklch(0.983 0.004 75);
+  --app-surface: oklch(1 0 0);
+  --app-surface-raised: oklch(0.968 0.006 75);
+  --app-surface-hover: oklch(0.94 0.008 75);
+  --app-border: oklch(0.9 0.006 75);
+  --app-border-strong: oklch(0.82 0.01 75);
+
+  --app-primary: oklch(0.548 0.216 271);
+  --app-primary-hover: oklch(0.478 0.212 271);
+  --app-primary-active: oklch(0.408 0.192 271);
+  --app-accent: oklch(0.58 0.223 322);
+  --app-accent-hover: oklch(0.5 0.213 322);
+  --app-on-primary: oklch(1 0 0);
+
+  --app-text: oklch(0.208 0.014 271);
+  --app-text-muted: oklch(0.44 0.02 271);
+  --app-text-faint: oklch(0.64 0.016 271);
+
+  --app-success: oklch(0.52 0.15 148);
+  --app-success-bg: oklch(0.96 0.03 148);
+  --app-warning: oklch(0.55 0.16 65);
+  --app-warning-bg: oklch(0.96 0.05 85);
+  --app-danger: oklch(0.5 0.19 25);
+  --app-danger-bg: oklch(0.96 0.03 25);
+  --app-info: oklch(0.5 0.17 255);
+  --app-info-bg: oklch(0.96 0.02 255);
+
+  --app-ring: color-mix(in oklch, var(--app-primary) 45%, transparent);
+
+  /* Layered, tinted shadows — single light source above-left, opacity thinning
+     per layer — instead of one flat rgba(black) blur. */
+  --app-shadow-xs: 0 1px 2px color-mix(in oklch, var(--app-text) 6%, transparent);
+  --app-shadow-sm:
+    0 1px 2px color-mix(in oklch, var(--app-text) 5%, transparent),
+    0 2px 4px color-mix(in oklch, var(--app-text) 4%, transparent);
+  --app-shadow-md:
+    0 1px 2px color-mix(in oklch, var(--app-text) 4%, transparent),
+    0 4px 8px color-mix(in oklch, var(--app-text) 5%, transparent),
+    0 10px 20px color-mix(in oklch, var(--app-text) 5%, transparent);
+  --app-shadow-lg:
+    0 2px 4px color-mix(in oklch, var(--app-text) 4%, transparent),
+    0 8px 16px color-mix(in oklch, var(--app-text) 6%, transparent),
+    0 24px 48px color-mix(in oklch, var(--app-text) 8%, transparent);
+  --app-shadow-glow:
+    0 0 0 1px color-mix(in oklch, var(--app-primary) 12%, transparent),
+    0 8px 24px color-mix(in oklch, var(--app-primary) 22%, transparent),
+    0 0 48px color-mix(in oklch, var(--app-primary) 10%, transparent);
+  --app-shadow-glow-accent:
+    0 0 0 1px color-mix(in oklch, var(--app-accent) 12%, transparent),
+    0 8px 24px color-mix(in oklch, var(--app-accent) 22%, transparent),
+    0 0 48px color-mix(in oklch, var(--app-accent) 10%, transparent);
+}
+
+/* ---- Dark theme ----
+   Never pure black: base sits at L≈0.16 with each elevation step +3–4% lighter,
+   which is what actually reads as "layered" in dark mode — shadows barely
+   register against near-black, so depth here comes from lightness, not blur. */
+:root.dark {
+  --app-bg: oklch(0.165 0.012 75);
+  --app-surface: oklch(0.205 0.014 75);
+  --app-surface-raised: oklch(0.245 0.016 75);
+  --app-surface-hover: oklch(0.29 0.018 75);
+  --app-border: oklch(0.32 0.016 75 / 70%);
+  --app-border-strong: oklch(0.42 0.02 75);
+
+  --app-primary: oklch(0.75 0.16 275);
+  --app-primary-hover: oklch(0.82 0.13 275);
+  --app-primary-active: oklch(0.88 0.1 275);
+  --app-accent: oklch(0.76 0.18 328);
+  --app-accent-hover: oklch(0.83 0.15 328);
+  --app-on-primary: oklch(0.165 0.012 75);
+
+  --app-text: oklch(0.955 0.006 75);
+  --app-text-muted: oklch(0.72 0.014 75);
+  --app-text-faint: oklch(0.5 0.016 75);
+
+  --app-success: oklch(0.75 0.17 148);
+  --app-success-bg: color-mix(in oklch, oklch(0.75 0.17 148) 14%, transparent);
+  --app-warning: oklch(0.8 0.15 85);
+  --app-warning-bg: color-mix(in oklch, oklch(0.8 0.15 85) 14%, transparent);
+  --app-danger: oklch(0.72 0.17 25);
+  --app-danger-bg: color-mix(in oklch, oklch(0.72 0.17 25) 14%, transparent);
+  --app-info: oklch(0.72 0.13 255);
+  --app-info-bg: color-mix(in oklch, oklch(0.72 0.13 255) 14%, transparent);
+
+  --app-ring: color-mix(in oklch, var(--app-primary) 55%, transparent);
+
+  /* Dark mode swaps shadow-as-elevation for a near-invisible hairline border
+     (defined via --app-border above) plus a much subtler true-black shadow just
+     for grounding, not for depth — depth already comes from surface lightness. */
+  --app-shadow-xs: 0 1px 2px oklch(0 0 0 / 28%);
+  --app-shadow-sm: 0 1px 2px oklch(0 0 0 / 32%), 0 2px 6px oklch(0 0 0 / 22%);
+  --app-shadow-md: 0 2px 4px oklch(0 0 0 / 34%), 0 8px 16px oklch(0 0 0 / 26%);
+  --app-shadow-lg: 0 4px 10px oklch(0 0 0 / 40%), 0 20px 40px oklch(0 0 0 / 32%);
+  --app-shadow-glow:
+    0 0 0 1px color-mix(in oklch, var(--app-primary) 22%, transparent),
+    0 8px 28px color-mix(in oklch, var(--app-primary) 30%, transparent),
+    0 0 60px color-mix(in oklch, var(--app-primary) 16%, transparent);
+  --app-shadow-glow-accent:
+    0 0 0 1px color-mix(in oklch, var(--app-accent) 22%, transparent),
+    0 8px 28px color-mix(in oklch, var(--app-accent) 30%, transparent),
+    0 0 60px color-mix(in oklch, var(--app-accent) 16%, transparent);
+}
+
+@layer base {
+  html, body, #root {
+    height: 100%;
+  }
+  body {
+    margin: 0;
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection {
+    background: color-mix(in oklch, var(--color-primary) 28%, transparent);
+  }
+
+  /* Consistent, visible keyboard-focus ring on every interactive element without
+     relying on each component to opt in individually. */
+  :focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
+  /* Numerals (quota counts, subscriber stats, video counts) line up in fixed-width
+     columns instead of each digit claiming its own proportional space — reads as
+     a crafted metric, not incidental body text that happens to be a number. */
+  .tabular-nums, [data-numeric] {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+  .custom-scrollbar::-webkit-scrollbar-thumb { background: var(--color-border-strong); border-radius: 3px; }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: var(--color-text-faint); }
+
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      var(--color-surface-raised) 25%,
+      var(--color-surface-hover) 50%,
+      var(--color-surface-raised) 75%
+    );
+    background-size: 200% 100%;
+    animation: var(--animate-shimmer);
+  }
+
+  .text-gradient-brand {
+    background: linear-gradient(120deg, var(--color-primary), var(--color-accent));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Subtle organic grain over gradient/glass surfaces — kills the "flat PNG
+     gradient" look a pure CSS gradient has on its own. Used sparingly (hero /
+     spotlight surfaces only), not as a global texture. */
+  .bg-grain {
+    position: relative;
+    isolation: isolate;
+  }
+  .bg-grain::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0.05;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* Radial glow "blob" layers for hero/onboarding surfaces — 2-3 of these
+     stacked at different positions/hues reads as an aurora/mesh gradient
+     without needing an actual mesh-gradient CSS feature (not yet standard). */
+  .bg-aurora {
+    background-image:
+      radial-gradient(circle at 15% 0%, color-mix(in oklch, var(--color-primary) 22%, transparent), transparent 55%),
+      radial-gradient(circle at 85% 20%, color-mix(in oklch, var(--color-accent) 18%, transparent), transparent 50%),
+      radial-gradient(circle at 50% 100%, color-mix(in oklch, var(--color-primary) 10%, transparent), transparent 60%);
+  }
+}
+
+/* Respect the user's OS-level motion preference by SUBSTITUTING transform-heavy
+   entrances for a quick opacity fade, rather than freezing everything at 0ms —
+   state changes (a module switching, a card appearing) still need to register
+   visually for reduced-motion users, they just shouldn't have to see things fly
+   or scale across the screen to get that feedback. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --animate-slide-up: fadeIn 0.12s ease-out forwards;
+    --animate-scale-in: fadeIn 0.12s ease-out forwards;
+    --animate-pop: fadeIn 0.12s ease-out forwards;
+  }
+  *, *::before, *::after {
+    animation-duration: 0.12s !important;
+    transition-duration: 0.12s !important;
+    scroll-behavior: auto !important;
+  }
+  .bg-grain::after {
+    display: none;
+  }
+}
