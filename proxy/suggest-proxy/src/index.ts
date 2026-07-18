@@ -20,7 +20,9 @@
 
 const ALLOWED_ORIGINS = [
   'http://localhost:5173',
-  // Add the production origin here once panna-command-center is deployed publicly.
+  // Browsers never send a trailing slash (or any path) in the Origin header — it must be
+  // exactly scheme://host with nothing after, or this exact-match check silently never fires.
+  'https://panna-command-center.ai.studio',
 ];
 
 const MAX_QUERY_LENGTH = 100;
